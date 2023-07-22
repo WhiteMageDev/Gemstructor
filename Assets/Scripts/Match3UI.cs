@@ -8,34 +8,54 @@ using UnityEngine.UI;
 public class Match3UI : MonoBehaviour
 {
     [SerializeField] private Match3 match3;
-    public TMP_Text _timer;
-    public TMP_Text _score;
+
+    [Header("Top Panel UI")]
     public GameObject scorePan;
-    public TMP_Text _glass;
+    public TMP_Text _score;
+
     public GameObject glassPan;
+    public TMP_Text _glass;
+
     public TMP_Text _moves;
-    public GameObject gameOverPanel;
+    public TMP_Text _timer;
     public GameObject randomLevelPanel;
+
+    [Header("Game Over Panel UI")]
+    public GameObject gameOverPanel;
 
     public GameObject powerPanel;
     public TMP_Text _power;
+
     public TMP_Text _winlose;
     public GameObject startPanel;
     public List<Image> stars;
-    public Sprite activeStar;
     public GameObject retry;
     public GameObject next;
 
     LevelSO levelSO;
-
     public static bool timerCheck;
     public static bool timeIsOver;
     bool timerStop;
     int power;
+    public static int currentPower;
     bool isWin;
-    public SelectorSO selector;
+
+    public GameObject tipButton;
+    public TMP_Text tipPowerText;
+
     private IDataService DataService = new JsonDataService();
 
+    [Header("Achievemants")]
+    public GameObject achievemantsPanel;
+    public Image achievemantLogo;
+    public TMP_Text achievemantName;
+    public TMP_Text achievemantText;
+
+    public GameObject finishButton;
+
+    LvlData lvlData;
+
+    public static event Action OnFinishButton;
 
 
 
@@ -50,6 +70,69 @@ public class Match3UI : MonoBehaviour
         match3.OnUseMove += Match3_OnUseMove;
         match3.OnGameOver += Match3_OnGameOver;
         match3.OnGlassInc += Match3_OnGlassInc;
+        PlayerStats.OnGetAchievement += PlayerStats_OnGetAchievement;
+        match3.OnTipRefresh += Match3_OnTipRefresh;
+    }
+
+    private void Match3_OnTipRefresh()
+    {
+        CheckTipButton();
+    }
+
+    private void Start()
+    {
+        LoadSavedData();
+        currentPower = lvlData.power;
+        CheckTipButton();
+    }
+    void CheckTipButton()
+    {
+        Button _tipButton = tipButton.GetComponent<Button>();
+        if (currentPower >= 50)
+        {
+            _tipButton.interactable = true;
+        }
+        else
+        {
+            _tipButton.interactable = false;
+        }
+        tipPowerText.text = currentPower.ToString();
+    }
+    private void OnDisable()
+    {
+        PlayerStats.OnGetAchievement -= PlayerStats_OnGetAchievement;
+        match3.OnLevelSet -= Match3_OnLevelSet;
+
+        match3.OnScoreChange -= Match3_OnScoreChange;
+        match3.OnUseMove -= Match3_OnUseMove;
+        match3.OnGameOver -= Match3_OnGameOver;
+        match3.OnGlassInc -= Match3_OnGlassInc;
+
+        lvlData.power = currentPower + power;
+
+        if (DataService.SaveData(Utils.pathLvlData, lvlData))
+            Debug.Log("File saved");
+        else
+            Debug.Log("error");
+    }
+
+    private async void PlayerStats_OnGetAchievement(string name, string desc, int i)
+    {
+        if (achievemantsPanel != null && !achievemantsPanel.activeSelf)
+        {
+            achievemantName.text = name;
+            achievemantText.text = desc;
+            achievemantLogo.sprite = Utils.Ñollection.AchievementSprites[i];
+            achievemantsPanel.SetActive(true);
+        }
+        else
+        {
+            await Task.Delay(3000);
+            achievemantName.text = name;
+            achievemantText.text = desc;
+            achievemantLogo.sprite = Utils.Ñollection.AchievementSprites[i];
+            achievemantsPanel.SetActive(true);
+        }
     }
 
     private void Match3_OnGlassInc()
@@ -57,7 +140,7 @@ public class Match3UI : MonoBehaviour
         _glass.text = $"{match3.GetGlass()} / {levelSO.goalGlass}";
     }
 
-    private void Match3_OnGameOver()
+    private void Match3_OnGameOver(int res)
     {
         timerStop = true;
         gameOverPanel.SetActive(true);
@@ -108,20 +191,77 @@ public class Match3UI : MonoBehaviour
             case LevelSO.GoalType.None:
                 {
                     isWin = false;
-                    powerPanel.SetActive(false);
-                    startPanel.SetActive(false);
+                    powerPanel.SetActive(true);
+                    startPanel.SetActive(true);
                     _winlose.text = "You can't move!";
                     retry.SetActive(true);
-                    SoundManager.PlaySound(SoundManager.Sound.Lose);
+                    SoundManager.PlaySound(SoundManager.Sound.Win);
+                    if(levelSO.limit == LevelSO.Limit.Blocks)
+                    {
+                        CountBlockResult(res);
+                    }
+                    else if(levelSO.limit == LevelSO.Limit.None)
+                    {
+                        powerPanel.SetActive(false);
+                        startPanel.SetActive(false);
+                    }
+                    else if(levelSO.limit == LevelSO.Limit.Time)
+                    {
+                        powerPanel.SetActive(false);
+                        startPanel.SetActive(false);
+                        _winlose.text = "Time is over!";
+                    }
                     break;
                 }
         }
+    }
+    public void Finish()
+    {
+        Match3_OnGameOver(0);
+        OnFinishButton?.Invoke();
+    }
+
+    private void CountBlockResult(int a)
+    {
+        int totalBlocks = levelSO.w *levelSO.h ;
+        int survivedBlocks = a;
+        float p = (float)survivedBlocks / totalBlocks;
+        int diff = 100 - (int)(p * 100);
+
+        int starCounter = 0;
+
+        if (diff >= 90)
+            starCounter = 5;
+        else if (diff >= 80)
+            starCounter = 4;
+        else if (diff >= 75)
+            starCounter = 3;
+        else if (diff >= 70)
+            starCounter = 2;
+        else if (diff >= 65)
+            starCounter = 1;
+        else
+            starCounter = 0;
+
+
+        power = 20 * starCounter + UnityEngine.Random.Range(0, 10);
+
+        for (int j = 0; j < starCounter; j++)
+        {
+            stars[j].sprite = Utils.Ñollection.activeStar;
+        }
+        if (PlayerStats.Achievements().RandomLevelB.capacity == 0 && starCounter == 5)
+            for (int i = 0; i < starCounter; i++)
+            {
+                PlayerStats.IncRandomLevelBCounter();
+            }
+        CountPower();
     }
 
     public async void CountPower()
     {
         int a = 0;
-        while (a < power)
+        while (a <= power)
         {
 
             _power.text = a.ToString();
@@ -146,30 +286,27 @@ public class Match3UI : MonoBehaviour
             }
         }
 
-        power = 20 * starCounter + max / levelSO.moves;
+        power = 20 * starCounter;
 
         for (int j = 0; j < starCounter; j++)
         {
-            stars[j].sprite = activeStar;
+            stars[j].sprite = Utils.Ñollection.activeStar;
         }
         CountPower();
-        SaveLevelData(isWin, starCounter);
+        SaveLevelData(isWin, starCounter, power);
     }
-    void SaveLevelData(bool isWin, int stars)
+
+    private void LoadSavedData()
     {
-        if (!isWin) return;
-
-        int num = PlayerPrefs.GetInt("LVLTOLOAD", 1);
-        Lvl lvl = new(num, false, isWin, stars);
-        LvlData lvlData = new();
-
-        if (!DataService.IsFileExists("/player-saved-data.json"))
+        lvlData = DataService.LoadData<LvlData>(Utils.pathLvlData);
+    }
+    void SaveLevelData(bool isWin, int stars, int power)
+    {
+        if (isWin)
         {
-            lvlData.Add(lvl);
-        }
-        else
-        {
-            lvlData = DataService.LoadData<LvlData>("/player-saved-data.json");
+            int num = PlayerPrefs.GetInt("LVLTOLOAD", 1);
+            Lvl lvl = new(num, false, isWin, stars);
+
             bool check = false;
             foreach (Lvl item in lvlData.GetList())
             {
@@ -178,19 +315,26 @@ public class Match3UI : MonoBehaviour
                     check = true;
                     item.isDone = isWin;
                     if (item.stars < stars)
+                    {
                         item.stars = stars;
+                        if (stars == 5)
+                        {
+                            Debug.Log("5 star lvl odl lvl");
+                            PlayerStats.IncCompletedLevelsCounter();
+                        }
+                    }
                 }
             }
             if (!check)
             {
                 lvlData.Add(lvl);
+                if (stars == 5)
+                {
+                    Debug.Log("5 star lvl new lvl");
+                    PlayerStats.IncCompletedLevelsCounter();
+                }
             }
         }
-
-        if (DataService.SaveData("/player-saved-data.json", lvlData))
-            Debug.Log("File saved");
-        else
-            Debug.Log("error");
     }
     private void CountStats()
     {
@@ -209,25 +353,31 @@ public class Match3UI : MonoBehaviour
             }
         }
 
-        power = 20 * starCounter + max / levelSO.moves;
+        power = 20 * starCounter;
 
         for (int j = 0; j < starCounter; j++)
         {
-            stars[j].sprite = activeStar;
+            stars[j].sprite = Utils.Ñollection.activeStar;
         }
         CountPower();
-        SaveLevelData(isWin, starCounter);
+        SaveLevelData(isWin, starCounter, power);
     }
     private void Match3_OnUseMove()
     {
         _moves.text = match3.GetMoves().ToString();
     }
-    private void Match3_OnScoreChange()
+    private void Match3_OnScoreChange(int s)
     {
         if (levelSO.goalType != LevelSO.GoalType.None)
             _score.text = $"{match3.GetScore()} / {levelSO.goalScore}";
         else
+        {
+            if(levelSO.limit == LevelSO.Limit.None)
+                PlayerStats.IncRandomLevelRCounter(s);
+            if (levelSO.limit == LevelSO.Limit.Time)
+                PlayerStats.IncRandomLevelTCounter(s);
             _score.text = $"{match3.GetScore()}";
+        }
     }
     private void Match3_OnTimerStart()
     {
@@ -258,6 +408,7 @@ public class Match3UI : MonoBehaviour
                 }
             case LevelSO.GoalType.None:
                 {
+
                     scorePan.gameObject.SetActive(true);
                     _score.text = $"0";
                     break;
@@ -268,6 +419,7 @@ public class Match3UI : MonoBehaviour
             default:
             case LevelSO.Limit.Time:
                 {
+
                     _timer.gameObject.SetActive(true);
                     TimeSpan timeSpan = TimeSpan.FromSeconds(levelSO.time);
                     _timer.text = timeSpan.ToString("m':'ss");
@@ -281,6 +433,12 @@ public class Match3UI : MonoBehaviour
                 }
             case LevelSO.Limit.None:
                 {
+                    finishButton.SetActive(true);
+                    randomLevelPanel.SetActive(true);
+                    break;
+                }
+            case LevelSO.Limit.Blocks:
+                {
                     randomLevelPanel.SetActive(true);
                     break;
                 }
@@ -288,16 +446,34 @@ public class Match3UI : MonoBehaviour
     }
     public async void CountdownTimer()
     {
-        int t = levelSO.time;
-        while (t > 0)
+        int startTime = levelSO.time;
+        int remainingTime = startTime;
+
+        while (remainingTime > 0)
         {
             if (timerStop) break;
-            TimeSpan timeSpan = TimeSpan.FromSeconds(t);
-            _timer.text = timeSpan.ToString("m':'ss");
+
+            if (Time.timeScale > 0)
+            {
+                TimeSpan timeSpan = TimeSpan.FromSeconds(remainingTime);
+                _timer.text = timeSpan.ToString("m':'ss");
+                remainingTime--;
+            }
+
             await Task.Delay(1000);
-            t--;
         }
+
         _timer.text = "0:00";
         timeIsOver = true;
+    }
+
+    public void Tip()
+    {
+        if(currentPower >= 50)
+        {
+            match3.GetTip();
+            currentPower -= 50;
+            CheckTipButton();
+        }
     }
 }

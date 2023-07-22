@@ -18,7 +18,7 @@ public class EditorGem : MonoBehaviour, IPointerDownHandler
     {
         gemSO = g;
         hasGlass = gl;
-        img.sprite = g != null ? gemSO.sprite : LevelEditor.i.empty;
+        img.sprite = g != null ? gemSO.sprite : Utils.Ñollection.Empty;
         glass.SetActive(hasGlass);
     }
     public void OnPointerDown(PointerEventData eventData)
@@ -26,6 +26,7 @@ public class EditorGem : MonoBehaviour, IPointerDownHandler
         if (Input.GetMouseButton(0))
         {
             img.sprite = LevelEditor.i.selected;
+            gemSO = LevelEditor.i.selectedGemSO;
         }
         else
         {

@@ -235,7 +235,6 @@ GameObject:
   m_Component:
   - component: {fileID: 137192159}
   - component: {fileID: 137192160}
-  - component: {fileID: 137192161}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -271,19 +270,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 154527d1c74c9724790de2ca32b071c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &137192161
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 137192158}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cf424a72f2b7bf4d8149891c922b5b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fader: {fileID: 4350361620442737595}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -593,7 +579,7 @@ GameObject:
   - component: {fileID: 1386897104}
   - component: {fileID: 1386897103}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -639,7 +625,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8526bd6a206f59649baea2eccba82b9a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: dd2630ad9ec5e804b922efe4fc0681bd, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -670,7 +656,7 @@ GameObject:
   - component: {fileID: 1642257552}
   - component: {fileID: 1642257555}
   m_Layer: 5
-  m_Name: Button
+  m_Name: PlayButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -694,7 +680,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 120}
+  m_SizeDelta: {x: 280, y: 200}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1642257552
 MonoBehaviour:
@@ -740,7 +726,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 137192161}
+      - m_Target: {fileID: 4350361620442737595}
         m_TargetAssemblyTypeName: NavController, Assembly-CSharp
         m_MethodName: gotoSceneA
         m_Mode: 5
@@ -752,7 +738,7 @@ MonoBehaviour:
           m_StringArgument: LevelSelector
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 137192161}
+      - m_Target: {fileID: 4350361620442737595}
         m_TargetAssemblyTypeName: NavController, Assembly-CSharp
         m_MethodName: PlayClickSound
         m_Mode: 1
@@ -794,15 +780,15 @@ MonoBehaviour:
       m_Calls: []
   m_text: play
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: b5d8ef731f5d6b646aad067e40fb6762, type: 2}
-  m_sharedMaterial: {fileID: 5076196540493158334, guid: b5d8ef731f5d6b646aad067e40fb6762, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 48602247a8927b54fafbe4d672aff0e1, type: 2}
+  m_sharedMaterial: {fileID: -7799098528012824934, guid: 48602247a8927b54fafbe4d672aff0e1, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278251775
-  m_fontColor: {r: 1, g: 0.94259137, b: 0, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -819,12 +805,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 71.35
+  m_fontSize: 90
   m_fontSizeBase: 24
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 90
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -910,7 +896,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4350361621075887114, guid: 791b4462c2294494ca32dc214ac8444b, type: 3}
       propertyPath: m_Name
-      value: Fader
+      value: NavController-Fader
       objectReference: {fileID: 0}
     - target: {fileID: 4350361621075887118, guid: 791b4462c2294494ca32dc214ac8444b, type: 3}
       propertyPath: m_Pivot.x
@@ -1000,12 +986,12 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 791b4462c2294494ca32dc214ac8444b, type: 3}
 --- !u!114 &4350361620442737595 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4350361621075887119, guid: 791b4462c2294494ca32dc214ac8444b, type: 3}
+  m_CorrespondingSourceObject: {fileID: 867201311159696945, guid: 791b4462c2294494ca32dc214ac8444b, type: 3}
   m_PrefabInstance: {fileID: 4350361620442737594}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43cffc4d81b726e499ecf70b411e8f65, type: 3}
+  m_Script: {fileID: 11500000, guid: 3cf424a72f2b7bf4d8149891c922b5b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

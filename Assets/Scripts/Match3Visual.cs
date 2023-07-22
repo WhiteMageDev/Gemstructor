@@ -7,15 +7,14 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Match3))]
 public class Match3Visual : MonoBehaviour
 {
-    public RectTransform canvas;
-    Match3 match3;
-    public GameObject gemPrefab;
-    public Transform gameBoard;
-    public Transform gameBoardBackground;
-    public Transform boardContainer;
-    public Sprite brokenGlass;
-    public GameObject[] boardBackground;
+    [Header("Debug Info")]
+    [SerializeField] private State state;
+    [SerializeField] private float busyTimer;
 
+    Match3 match3;
+    private Transform gameBoard;
+    private Transform gameBoardBackground;
+    private Transform boardContainer;
     private List<GemVisual> gemVisualsList;
     private List<GameObject> destroyedRects;
     public enum State
@@ -25,12 +24,9 @@ public class Match3Visual : MonoBehaviour
         TryFindMatches,
         GameOver,
     }
-    private State state;
     private Point startDragPosition;
     private Point endDragPosition;
     private bool isDragging;
-    private float busyTimer;
-    private bool soundCheck;
 
     public event EventHandler OnStateChanged;
     public static event Action<Gem> OnGlassDestroyed;
@@ -38,6 +34,11 @@ public class Match3Visual : MonoBehaviour
     public static event Action OnCheckResize;
     private void Awake()
     {
+        gameBoard = GameObject.Find("Game/GameBoardCanvas/BoardContainer/Board").transform;
+        gameBoardBackground = GameObject.Find("Game/GameBoardCanvas/BoardContainer/BoardBG").transform;
+        boardContainer = GameObject.Find("Game/GameBoardCanvas/BoardContainer").transform;
+
+
         match3 = GetComponent<Match3>();
         destroyedRects = new();
         gemVisualsList = new();
@@ -49,6 +50,12 @@ public class Match3Visual : MonoBehaviour
         MovingPiece.OnDrop += MovingPiece_OnDrop;
         match3.OnBombCreated += Match3_OnBombCreated;
         Gem.OnGlassHPRedused += Gem_OnGlassHPRedused;
+        Match3UI.OnFinishButton += Match3UI_OnFinishButton;
+    }
+
+    private void Match3UI_OnFinishButton()
+    {
+        SetState(State.GameOver);
     }
 
     private void Gem_OnGlassHPRedused(Gem gem, int hp)
@@ -57,15 +64,9 @@ public class Match3Visual : MonoBehaviour
         {
             if (v.GetGem() == gem)
             {
-                if (hp == 1)
-                    v.GetRect().GetChild(7).GetComponent<Image>().sprite = brokenGlass;
-                else if (hp == 0)
-                {
-                    v.GetRect().GetComponent<Animator>().SetTrigger("glassDestroy");
-                    v.GetRect().GetChild(7).gameObject.SetActive(false);
-                    v.GetGem().DestroyGlass();
+                if(hp == 0)
                     match3.IncGlass();
-                }
+                v.GlassLoseHP(hp);
             }
         }
     }
@@ -79,7 +80,7 @@ public class Match3Visual : MonoBehaviour
         }
         else
         {
-            obj = Instantiate(gemPrefab, gameBoard);
+            obj = Instantiate(Utils.Ñollection.GemPrefab, gameBoard);
         }
         obj.SetActive(true);
         RectTransform rect = obj.GetComponent<RectTransform>();
@@ -98,7 +99,7 @@ public class Match3Visual : MonoBehaviour
         }
         else
         {
-            obj = Instantiate(gemPrefab, gameBoard);
+            obj = Instantiate(Utils.Ñollection.GemPrefab, gameBoard);
         }
         obj.SetActive(true);
         RectTransform rect = obj.GetComponent<RectTransform>();
@@ -107,19 +108,9 @@ public class Match3Visual : MonoBehaviour
         GemVisual gemVisual = new(gem, rect);
         gemVisualsList.Add(gemVisual);
     }
-
-    private async void PlaySoundOnce(SoundManager.Sound i)
-    {
-        if (true)
-        {
-            soundCheck = true;
-            SoundManager.PlaySound(i);
-            await Task.Delay(300);
-            soundCheck = false;
-        }
-    }
     private void GemDestroyed(Gem gem, bool silent)
     {
+        PlayerStats.IncDestroyedGemsCounter();
         GemVisual target = null;
         foreach (GemVisual gemVisual in gemVisualsList)
         {
@@ -170,9 +161,8 @@ public class Match3Visual : MonoBehaviour
         {
             for (int y = 0; y < match3.h; y++)
             {
-                GameObject obj = Instantiate(gemPrefab, gameBoard);
-                GameObject objBG = Instantiate(boardBackground[y % 2 == 0 ? 0 : 1], gameBoardBackground);
-
+                GameObject obj = Instantiate(Utils.Ñollection.GemPrefab, gameBoard);
+                GameObject objBG = Instantiate(Utils.Ñollection.BackgroundPrefabs[y % 2 == 0 ? 0 : 1], gameBoardBackground);
                 RectTransform objRect = obj.GetComponent<RectTransform>();
                 RectTransform objBGRect = objBG.GetComponent<RectTransform>();
                 objRect.anchoredPosition = new Vector2(-32 - (64 * x), -32);
@@ -186,6 +176,17 @@ public class Match3Visual : MonoBehaviour
             }
         }
         SetBusyState(.5f, () => SetState(State.WaitingForUser));
+    }
+
+    public void BotMove()
+    {
+        List <Point> list = match3.BotExpertMove();
+        if(list != null && list.Count > 0)
+        {
+            startDragPosition = list[0];
+            endDragPosition = list[1];
+            isDragging = true;
+        }
     }
 
     private async void Update()
@@ -206,13 +207,17 @@ public class Match3Visual : MonoBehaviour
                 }
             case State.WaitingForUser:
                 {
+                    if (match3.IsBotOn())
+                    {
+                        BotMove();
+                    }
                     if (isDragging)
                     {
                         isDragging = false;
                         SetBusyState(.6f, () => SetState(State.WaitingForUser));
                         if (await match3.FlipAsync(startDragPosition, endDragPosition))
                         {
-                            // we have match
+                            //  We have match
                             SetBusyState(.1f, () => SetState(State.TryFindMatches));
                         }
                         else
@@ -258,11 +263,15 @@ public class Match3Visual : MonoBehaviour
         endDragPosition = arg2;
         isDragging = true;
     }
+    public void SetGameOver()
+    {
+        SetState(State.GameOver);
+    }
     private void TrySetStateWaitingForUser()
     {
         if (match3.TryIsGameOver())
         {
-            // Game Over!
+            // Game Over
             SetState(State.GameOver);
         }
         else
@@ -303,6 +312,20 @@ public class GemVisual
     public RectTransform GetRect()
     {
         return rect;
+    }
+    public void GlassLoseHP(int hp)
+    {
+        GameObject glass = rect.Find("Glass").gameObject;
+        if (hp == 1)
+        {
+            glass.GetComponent<Image>().sprite = Utils.Ñollection.BrokenGlass;
+        }
+        else if (hp == 0)
+        {
+            rect.GetComponent<Animator>().SetTrigger("glassDestroy");
+            glass.SetActive(false);
+            gem.DestroyGlass();
+        }
     }
     public void Clear()
     {

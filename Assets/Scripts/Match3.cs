@@ -2,22 +2,28 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Linq;
 
 public class Match3 : MonoBehaviour
 {
-    public List<LevelSO> listOfLevels;
-    public LevelSO randomLevel;
-    public List<GemSO> listOfBombSO;
+
+    private List<LevelSO> listOfLevels;
+    private LevelSO randomLevelR;
+    private LevelSO randomLevelB;
+    private LevelSO randomLevelT;
+    [HideInInspector] public List<GemSO> listOfBombSO;
+
+    [Header("Debug Info")]
+    [SerializeField] private bool isBotOn;
+    [SerializeField] private LevelSO levelSO;
+    [SerializeField] private int moves;
+    [SerializeField] private int score;
+    [SerializeField] private int glass;
 
     [HideInInspector] public int w;
     [HideInInspector] public int h;
-    [HideInInspector] public Slot[,] gameBoard;
-
-    private LevelSO levelSO;
-    private List<Point> lastMatch;
-    private int moves;
-    private int score;
-    private int glass;
+    [HideInInspector] public Slot[,] gameBoard;    
+    private List<Point> lastMatch;    
 
     public event Action OnLevelSetupComplete;
     public event EventHandler<OnLevelSetEventArgs> OnLevelSet;
@@ -28,21 +34,42 @@ public class Match3 : MonoBehaviour
     public event Action<Gem> OnNewGemCreated;
     public event Action OnTimerStart;
     public event Action OnUseMove;
-    public event Action OnScoreChange;
-    public event Action OnGameOver;
+    public event Action<int> OnScoreChange;
+    public event Action<int> OnGameOver;
     public event Action<Gem> OnBombCreated;
     public event Action OnGlassInc;
+    public event Action OnTipRefresh;
     private void Awake()
     {
+        listOfLevels = new(Utils.Ñollection.listOfLevels);
+        randomLevelR = Utils.Ñollection.randomLevelR;
+        randomLevelB = Utils.Ñollection.randomLevelB;
+        randomLevelT = Utils.Ñollection.randomLevelT;
+        listOfBombSO = new(Utils.Ñollection.listOfBombSO);
+
         LevelSetup();
+    }
+    public bool IsBotOn()
+    {
+        return isBotOn;
     }
     private void LevelSetup()
     {
         int levelNum = PlayerPrefs.GetInt("LVLTOLOAD", 0);
         if (levelNum == 0)
         {
-            levelSO = randomLevel;
-            SetupRandomLevel();
+            levelSO = randomLevelR;
+            SetupRandomLevel(0);
+        }
+        else if (levelNum == -1)
+        {
+            levelSO = randomLevelB;
+            SetupRandomLevel(-1);
+        }
+        else if (levelNum == -2)
+        {
+            levelSO = randomLevelT;
+            SetupRandomLevel(-2);
         }
         else
         {
@@ -62,7 +89,8 @@ public class Match3 : MonoBehaviour
                     for (int y = 0; y < h; y++)
                     {
                         Point p = new(x, y);
-                        Gem newGem = new(p, gemDataList[0].gemSO, gemDataList[0].hasGlass, false);
+                        bool isStone = gemDataList[0].gemSO == Utils.Ñollection.stone;
+                        Gem newGem = new(p, gemDataList[0].gemSO, gemDataList[0].hasGlass, listOfBombSO.Contains(gemDataList[0].gemSO), isStone);
                         Slot newSlot = new(p, newGem);
                         gameBoard[x, y] = newSlot;
                         gemDataList.RemoveAt(0);
@@ -73,26 +101,37 @@ public class Match3 : MonoBehaviour
             }
             else
             {
-                //Debug.LogError("No level data found.");
+                Debug.LogError("No level data found.");
                 return;
             }
         }
     }
-
-    private void SetupRandomLevel()
+    private void SetupRandomLevel(int t)
     {
-        w = UnityEngine.Random.Range(6, 12);
-        h = UnityEngine.Random.Range(6, 12);
+        if(t == -1)
+        {
+            w = 8; h = 8;
+        }
+        else if (t == -2)
+        {
+            w = 10; h = 10;
+        }
+        else
+        {
+            w = UnityEngine.Random.Range(6, 12);
+            h = UnityEngine.Random.Range(6, 12);
+        }
         moves = 0;
         gameBoard = new Slot[w, h];
         for (int x = 0; x < w; x++)
         {
             for (int y = 0; y < h; y++)
             {
-                int gemIndex = UnityEngine.Random.Range(0, listOfLevels[0].gemList.Count);
+                int gemIndex = UnityEngine.Random.Range(0, randomLevelR.gemList.Count);
                 bool isGlass = false;
                 Point p = new(x, y);
-                Gem newGem = new(p, listOfLevels[0].gemList[gemIndex], isGlass, false);
+
+                Gem newGem = new(p, randomLevelR.gemList[gemIndex], isGlass, false, false);
                 Slot newSlot = new(p, newGem);
                 gameBoard[x, y] = newSlot;
             }
@@ -100,7 +139,81 @@ public class Match3 : MonoBehaviour
         OnLevelSetupComplete?.Invoke();
         OnLevelSet?.Invoke(this, new OnLevelSetEventArgs { levelSO = levelSO });
     }
+    public List<Point> BotExpertMove()
+    {
+        //  Check if we have any bombs. If we have - explode.
+        //  If there is no bombs around - find all possible matches.
+        //  If we have match near glass block - return this move.
+        //  Else return the longest match.
 
+        List<Point> returnlist = new();
+        List<BotLinkInfo> list = new();
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                Point p = new(x, y);
+                List<Point> dir = new()
+                {
+                    Point.add(p, Point.up),
+                    Point.add(p, Point.left),
+                    Point.add(p, Point.right),
+                    Point.add(p, Point.down),
+                };
+                if (GetSlotAtPoint(p) != null)
+                    if(GetSlotAtPoint(p).GetGem() != null)
+                        if (GetSlotAtPoint(p).GetGem().IsBomb())
+                        {
+                            returnlist.Add(p);
+                            foreach (Point d in dir)
+                            {
+                                if (IsValidPoint(d))
+                                {
+                                    returnlist.Add(d);
+                                    return returnlist;
+                                }
+                            } 
+                        }
+                foreach (Point d in dir)
+                {
+                    if (IsValidPoint(d))
+                    {
+                        BotLinkInfo info = FlipSilentBot(p, d);
+                        if(info != null)
+                            list.Add(info);
+                    }
+                }
+            }
+        }
+        int maxSize = 0;
+        BotLinkInfo maxLinkInfo = new();
+        foreach (BotLinkInfo info in list)
+        {
+            if (info.isGlassNear)
+            {
+                returnlist.Add(info.one);
+                returnlist.Add(info.two);
+                return returnlist;
+            }
+            else if(info.size >= maxSize)
+            {
+                maxSize = info.size;
+                maxLinkInfo = info;
+            }
+        }
+        if (maxLinkInfo.size != 0)
+        {
+            returnlist.Add(maxLinkInfo.one);
+            returnlist.Add(maxLinkInfo.two);
+        }
+        return returnlist;
+    }
+    public async void GetTip()
+    {
+        isBotOn = true;
+        await Task.Delay(300);
+        isBotOn = false;
+    }
     public async Task<bool> FlipAsync(Point one, Point two)
     {
         if (Match3UI.timerCheck) OnTimerStart?.Invoke();
@@ -108,11 +221,12 @@ public class Match3 : MonoBehaviour
         if (!IsValidPoint(one) || !IsValidPoint(two)) return false;
         if (!GetSlotAtPoint(one).HasGem() || !GetSlotAtPoint(two).HasGem()) return false;
         if (GetSlotAtPoint(one).GetGem().HasGlass() || GetSlotAtPoint(two).GetGem().HasGlass()) return false;
+        if (GetSlotAtPoint(one).GetGem().IsStone() || GetSlotAtPoint(two).GetGem().IsStone()) return false;
 
         bool successful = false;
 
         FlipGems(one, two, false);
-        // wait moving animation
+        //  Wait moving animation
         await Task.Delay(350);
 
         if (HasLink(one) || HasLink(two))
@@ -124,12 +238,12 @@ public class Match3 : MonoBehaviour
             FlipGems(two, one, false);
         return successful;
     }
-
     public bool FlipSilent(Point one, Point two)
     {
         if (!IsValidPoint(one) || !IsValidPoint(two)) return false;
         if (!GetSlotAtPoint(one).HasGem() || !GetSlotAtPoint(two).HasGem()) return false;
         if (GetSlotAtPoint(one).GetGem().HasGlass() || GetSlotAtPoint(two).GetGem().HasGlass()) return false;
+        if (GetSlotAtPoint(one).GetGem().IsStone() || GetSlotAtPoint(two).GetGem().IsStone()) return false;
 
         bool successful = false;
 
@@ -140,6 +254,48 @@ public class Match3 : MonoBehaviour
 
         FlipGems(two, one, true);
         return successful;
+    }
+    public BotLinkInfo FlipSilentBot(Point one, Point two)
+    {
+        if (!IsValidPoint(one) || !IsValidPoint(two)) return null;
+        if (!GetSlotAtPoint(one).HasGem() || !GetSlotAtPoint(two).HasGem()) return null;
+        if (GetSlotAtPoint(one).GetGem().HasGlass() || GetSlotAtPoint(two).GetGem().HasGlass()) return null;
+        if (GetSlotAtPoint(one).GetGem().IsStone() || GetSlotAtPoint(two).GetGem().IsStone()) return null;
+
+        BotLinkInfo successful = new();
+
+        FlipGems(one, two, true);
+
+        if (HasLink(one))
+        {
+            int size = LinkSize(one);
+            successful.one = one;
+            successful.two = two;
+            successful.size = size;
+            successful.isNull = false;
+            if (IsGlassNear(IsConnected(one, true)).Count > 0)
+            {
+                successful.isGlassNear = true;
+            }
+        }
+        else if (HasLink(two))
+        {
+            int size = LinkSize(two);
+            successful.one = two;
+            successful.two = one;
+            successful.size = size;
+            successful.isNull = false;
+            if (IsGlassNear(IsConnected(two, true)).Count > 0)
+            {
+                successful.isGlassNear = true;
+            }
+        }
+
+        FlipGems(two, one, true);
+        if(!successful.isNull)
+            return successful;
+        else
+            return null;
     }
     public void FlipGems(Point one, Point two, bool silent)
     {
@@ -159,16 +315,61 @@ public class Match3 : MonoBehaviour
 
         if (silent) return;
 
-        if (listOfBombSO.Contains(slotOne.GetGem().GetGemSO()))
+        if(listOfBombSO.Contains(slotOne.GetGem().GetGemSO()) &&
+            listOfBombSO.Contains(slotTwo.GetGem().GetGemSO()) &&
+            !one.Equals(two))
         {
-            Explode(slotOne.GetIndex(), slotOne.GetGem().GetGemSO());
+            DoubleExplode(slotOne.GetIndex());
         }
-        if (listOfBombSO.Contains(slotTwo.GetGem().GetGemSO()))
+        else
         {
-            Explode(slotTwo.GetIndex(), slotTwo.GetGem().GetGemSO());
+            if (listOfBombSO.Contains(slotOne.GetGem().GetGemSO()))
+            {
+                Explode(slotOne.GetIndex(), slotOne.GetGem().GetGemSO());
+            }
+            if (listOfBombSO.Contains(slotTwo.GetGem().GetGemSO()))
+            {
+                Explode(slotTwo.GetIndex(), slotTwo.GetGem().GetGemSO());
+            }
         }
     }
-
+    private void DoubleExplode(Point p)
+    {
+        Slot slot = GetSlotAtPoint(p);
+        List<Point> radisu = new();
+        IncScore(-4);
+        for (int j = -1; j < 2; j++)
+        {
+            Point _a = new(p.x, p.y + j);
+            for (int i = 0; i < w; i++)
+            {
+                Point a = new(i, _a.y);
+                radisu.Add(a);
+            }
+            if (radisu.Contains(p))
+                radisu.Remove(p);
+        }
+        for (int j = -1; j < 2; j++)
+        {
+            Point _a = new(p.x + j, p.y);
+            for (int i = 0; i < h; i++)
+            {
+                Point a = new(_a.x, i);
+                radisu.Add(a);
+            }
+            if (radisu.Contains(p))
+                radisu.Remove(p);
+        }
+        foreach (Point point in radisu)
+        {
+            if (IsValidPoint(point))
+                if (GetSlotAtPoint(point).HasGem())
+                    if (!GetSlotAtPoint(point).GetGem().HasGlass())
+                    {
+                        GetSlotAtPoint(point).GetGem().SetGemSO(slot.GetGem().GetGemSO());
+                    }
+        }
+    }
     public void ClearGemsSetBomb()
     {
         if (lastMatch == null) return;
@@ -191,7 +392,7 @@ public class Match3 : MonoBehaviour
     {
         Point p = lastMatch[0];
         Slot slot = GetSlotAtPoint(p);
-        Gem bomb = new(p, bombSO, false, true);
+        Gem bomb = new(p, bombSO, false, true, false);
         slot.SetGem(bomb);
         OnBombCreated?.Invoke(bomb);
     }
@@ -202,6 +403,7 @@ public class Match3 : MonoBehaviour
 
         if (bomb == listOfBombSO[1])
         {
+            IncScore(-1);
             radisu = new()
             {
                 Point.add(Point.add(p, Point.up), Point.left),
@@ -216,6 +418,7 @@ public class Match3 : MonoBehaviour
         }
         else if (bomb == listOfBombSO[2])
         {
+            IncScore(-2);
             for (int i = 0; i < w; i++)
             {
                 Point a = new(i, p.y);
@@ -226,6 +429,7 @@ public class Match3 : MonoBehaviour
         }
         else if (bomb == listOfBombSO[3])
         {
+            IncScore(-2);
             for (int i = 0; i < h; i++)
             {
                 Point a = new(p.x, i);
@@ -236,6 +440,7 @@ public class Match3 : MonoBehaviour
         }
         else if (bomb == listOfBombSO[4])
         {
+            IncScore(-3);
             radisu = new()
             {
                 Point.add(Point.add(p, Point.up), Point.left),
@@ -266,12 +471,21 @@ public class Match3 : MonoBehaviour
         {
             if (IsValidPoint(point))
                 if (GetSlotAtPoint(point).HasGem())
+                {
                     if (!GetSlotAtPoint(point).GetGem().HasGlass())
                     {
-                        if (GetSlotAtPoint(point).GetGem().IsBomb())
-                            IncScore(2);
+                        if (GetSlotAtPoint(point).GetGem().GetGemSO() == Utils.Ñollection.stone)
+                        {
+                            IncScore(-5);
+                            PlayerStats.IncBreakStoneWallCounter();
+                        }
                         GetSlotAtPoint(point).GetGem().SetGemSO(slot.GetGem().GetGemSO());
                     }
+                }
+                else
+                {
+                    GetSlotAtPoint(point).SetGem(new Gem(point, slot.GetGem().GetGemSO(), false,false,false));
+                }
         }
     }
     public int MatchType(List<Point> linked)
@@ -340,7 +554,7 @@ public class Match3 : MonoBehaviour
             {
                 Point p = new Point(x, y);
                 List<Point> linked = IsConnected(p, true);
-                if (linked == null || linked.Count == 0 || GetSlotAtPoint(p).GetGem().HasGlass()) continue;
+                if (linked == null || linked.Count == 0 || GetSlotAtPoint(p).GetGem().HasGlass() || GetSlotAtPoint(p).GetGem().IsStone()) continue;
 
                 foreach (Point point in IsGlassNear(linked))
                 {
@@ -372,6 +586,7 @@ public class Match3 : MonoBehaviour
 
                             }
                             SoundManager.PlaySound(SoundManager.Sound.BombMatch);
+                            PlayerStats.IncCreatedRegularBombsCounter();
                             break;
                         }
                     case 2:
@@ -384,6 +599,7 @@ public class Match3 : MonoBehaviour
 
                             }
                             SoundManager.PlaySound(SoundManager.Sound.BombMatch);
+                            PlayerStats.IncCreatedRegularBombsCounter();
                             break;
                         }
                     case 3:
@@ -396,6 +612,7 @@ public class Match3 : MonoBehaviour
 
                             }
                             SoundManager.PlaySound(SoundManager.Sound.BombMatch);
+                            PlayerStats.IncCreatedRegularBombsCounter();
                             break;
                         }
                     case 4:
@@ -408,6 +625,7 @@ public class Match3 : MonoBehaviour
 
                             }
                             SoundManager.PlaySound(SoundManager.Sound.BombMatch);
+                            PlayerStats.IncCreatedTshapeBombsCounter();
                             break;
                         }
                     default:
@@ -448,8 +666,10 @@ public class Match3 : MonoBehaviour
                 for (int i = y - 1; i >= 0; i--)
                 {
                     Slot next = GetSlotAtPoint(new Point(x, i));
+
                     if (next.HasGem() && !next.GetGem().HasGlass())
                     {
+                        if (next.GetGem().IsStone()) break;
                         slot.SetGem(next.GetGem());
                         next.SetGem(null);
                         break;
@@ -470,27 +690,94 @@ public class Match3 : MonoBehaviour
                 if (!slot.HasGem())
                 {
                     GemSO gemSO = levelSO.gemList[UnityEngine.Random.Range(0, levelSO.gemList.Count)];
-                    Gem newGem = new Gem(slot.GetIndex(), gemSO, false, false);
+                    Gem newGem = new Gem(slot.GetIndex(), gemSO, false, false, false);
                     slot.SetGem(newGem);
                     OnNewGemCreated?.Invoke(newGem);
                 }
             }
         }
     }
+    public void ChakeBoard()
+    {
+        List<Point> slotsToSwap = new();
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                Point p = new(x, y);
+                Slot slot = GetSlotAtPoint(p);
+                if(slot.HasGem())
+                    if (slot.GetGem().HasGlass()) continue;
+
+                slotsToSwap.Add(p);
+            }
+        }
+
+        while (!IsMovePossible())
+        {
+            List<Point> slotsToSwapSecond = new(slotsToSwap);
+
+            for (int i = 0; i < slotsToSwap.Count / 2; i++)
+            {
+
+                Point one = slotsToSwapSecond[UnityEngine.Random.Range(0, slotsToSwapSecond.Count)];
+                slotsToSwapSecond.Remove(one);
+
+                Point two = slotsToSwapSecond[UnityEngine.Random.Range(0, slotsToSwapSecond.Count)];
+                slotsToSwapSecond.Remove(two);
+
+                FlipGems(one, two, true);
+
+            }
+        }
+    }
+    int BlockLvlSurvivedBlocks()
+    {
+        int res = 0;
+        for (int x = 0; x < w; x++)
+        {
+            for (int y = 0; y < h; y++)
+            {
+                Point p = new(x, y);
+                Slot slot = GetSlotAtPoint(p);
+                if (IsValidPoint(p))
+                {
+                    if (slot.HasGem())
+                        res++;
+                }
+            }
+        }
+        return res;
+    }
     public bool TryIsGameOver()
     {
         if (!IsMovePossible())
         {
-            OnGameOver?.Invoke();
-            return true;
+            if(levelSO.limit == LevelSO.Limit.Blocks)
+            {
+                OnGameOver?.Invoke(BlockLvlSurvivedBlocks());
+                return true;
+            }
+            if(Match3UI.currentPower >= 100)
+            {
+                Match3UI.currentPower -= 100;
+                OnTipRefresh?.Invoke();
+                ChakeBoard();
+                return false;
+            }
+            else
+            {
+                OnGameOver?.Invoke(0);
+                return true;
+            }
+
         }
-        if (levelSO.goalType == LevelSO.GoalType.None) return false;
 
         if (levelSO.limit == LevelSO.Limit.Moves)
         {
             if (moves <= 0)
             {
-                OnGameOver?.Invoke();
+                OnGameOver?.Invoke(0);
                 return true;
             }
         }
@@ -498,7 +785,7 @@ public class Match3 : MonoBehaviour
         {
             if (Match3UI.timeIsOver)
             {
-                OnGameOver?.Invoke();
+                OnGameOver?.Invoke(0);
                 return true;
             }
         }
@@ -506,7 +793,7 @@ public class Match3 : MonoBehaviour
         {
             if (score >= levelSO.goalScore)
             {
-                OnGameOver?.Invoke();
+                OnGameOver?.Invoke(0);
                 return true;
             }
 
@@ -515,7 +802,7 @@ public class Match3 : MonoBehaviour
         {
             if (glass >= levelSO.goalGlass)
             {
-                OnGameOver?.Invoke();
+                OnGameOver?.Invoke(0);
                 return true;
             }
 
@@ -530,7 +817,10 @@ public class Match3 : MonoBehaviour
             {
                 Point p = new Point(x, y);
                 if (!GetSlotAtPoint(p).HasGem()) continue;
-                if (listOfBombSO.Contains(GetSlotAtPoint(p).GetGem().GetGemSO())) return true;
+                if (listOfBombSO.Contains(GetSlotAtPoint(p).GetGem().GetGemSO()))
+                {
+                    return true;
+                }
 
                 List<Point> directions = new()
                 {
@@ -567,37 +857,54 @@ public class Match3 : MonoBehaviour
     }
     void IncScore(int matchType)
     {
+        int plus = 0;
         switch (matchType)
         {
+            case -5:
+                plus = 100;
+                break;
+            case -4:
+                plus = 333;
+                break;
+            case -3:
+                plus = 60;
+                break;
+            case -2:
+                plus = 40;
+                break;
+            case -1:
+                plus = 20;
+                break;
             case 0:
-                score += 50; // bomb type 1
+                plus = 40;
                 break;
             case 1:
-                score += 100; // bomb type 2
+                plus = 80;
                 break;
             case 2:
-                score += 150; // bomb type 3
+                plus = 120;
                 break;
             case 3:
-                score += 5;
+                plus = 5;
                 break;
             case 4:
-                score += 10;
+                plus = 10;
                 break;
             case 5:
-                score += 15;
+                plus = 15;
                 break;
             case 6:
-                score += 20;
+                plus = 20;
                 break;
             case 7:
-                score += 25;
+                plus = 25;
                 break;
             case > 7:
-                score += 30;
+                plus = 30;
                 break;
         }
-        OnScoreChange?.Invoke();
+        score += plus;
+        OnScoreChange?.Invoke(plus);
     }
     public int GetScore()
     {
@@ -615,6 +922,11 @@ public class Match3 : MonoBehaviour
     {
         List<Point> links = IsConnected(p, true);
         return links != null && links.Count > 0;
+    }
+    int LinkSize(Point p)
+    {
+        List<Point> links = IsConnected(p, true);
+        return links != null? links.Count: 0;
     }
     List<Point> IsConnected(Point p, bool main)
     {
@@ -858,16 +1170,22 @@ public class Gem
     private bool hasGlass;
     private int glassHP;
     private bool isBomb;
+    private bool isStone;
 
     public static event Action<Gem, int> OnGlassHPRedused;
 
-    public Gem(Point i, GemSO obj, bool g, bool b)
+    public Gem(Point i, GemSO obj, bool g, bool b, bool s)
     {
         index = i;
         gemSO = obj;
         hasGlass = g;
         isBomb = b;
         glassHP = 2;
+        isStone = s;
+    }
+    public bool IsStone()
+    {
+        return isStone;
     }
     public void SetIndex(Point i)
     {
@@ -909,6 +1227,7 @@ public class Gem
     public void DestroyGlass()
     {
         hasGlass = false;
+        PlayerStats.IncDestroyedGlassCounter();
     }
 
 

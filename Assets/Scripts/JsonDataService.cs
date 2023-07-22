@@ -15,7 +15,7 @@ public class JsonDataService : IDataService
         string path = Application.persistentDataPath + RelativePath;
         if (!File.Exists(path))
         {
-            //Debug.Log("no file");
+            return default;
         }
         try
         {
@@ -24,7 +24,7 @@ public class JsonDataService : IDataService
         }
         catch (Exception e)
         {
-            Debug.LogError(e.Message);
+            Debug.Log(e.Message);
             throw e;
         }
     }
@@ -36,21 +36,21 @@ public class JsonDataService : IDataService
         {
             if (File.Exists(path))
             {
-                //Debug.Log("Data exists");
+                Debug.Log("Data exists");
                 File.Delete(path);
             }
             else
             {
-                //Debug.Log("Create new file");
+                Debug.Log("Create new file");
             }
             using FileStream stream = File.Create(path);
             stream.Close();
             File.WriteAllText(path, JsonConvert.SerializeObject(Data));
             return true;
         }
-        catch (Exception)
+        catch (Exception e)
         {
-            //Debug.Log($"Cant save data {e.Message}");
+            Debug.Log($"Cant save data {e.Message}");
             return false;
         }
     }

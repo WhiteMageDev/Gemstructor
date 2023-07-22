@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: LevelSO8
   m_EditorClassIdentifier: 
   w: 8
-  h: 8
+  h: 9
   gemList:
   - {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
   - {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
@@ -22,119 +22,85 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
   - {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
   boardDataList:
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
     hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
     hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+    hasGlass: 0
   - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
     hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 1
   - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
     hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
     hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
     hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
-    hasGlass: 1
-  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
     hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
     hasGlass: 0
@@ -144,17 +110,67 @@ MonoBehaviour:
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
     hasGlass: 0
-  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
     hasGlass: 0
   - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
     hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 5a6a702793c05aa4fb972923c2e58ce2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: c23c0c9f23195054d8c6462667e37ae2, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 1
   - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
     hasGlass: 0
-  moves: 25
-  time: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: d074551c3936c68488183d8e3fb0631f, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 2741b7bb51a11064594437e56cc307c6, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  - gemSO: {fileID: 11400000, guid: 724928d884ba5f842bb058f9b404161f, type: 2}
+    hasGlass: 1
+  - gemSO: {fileID: 11400000, guid: 9fc9a3553d487a84ab5479ba3d082990, type: 2}
+    hasGlass: 0
+  moves: 40
+  time: 90
   goalScore: 0
   goalScoreMin: 0
-  goalGlass: 20
-  goalGlassMin: 18
-  limit: 1
+  goalGlass: 12
+  goalGlassMin: 6
+  limit: 0
   goalType: 1

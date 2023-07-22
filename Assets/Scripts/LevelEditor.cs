@@ -5,70 +5,84 @@ using UnityEngine.UI;
 public class LevelEditor : MonoBehaviour
 {
     public static LevelEditor i;
-    public int width;
-    public int height;
-    public GameObject obj;
-    public Transform container;
-    public Transform background;
+    private int width;
+    private int height;
+
+    private Transform container;
+    private Transform background;
+
     public LevelSO levelSO;
-    public List<GemSO> gems;
+    public List<GemSO> gemsForUse;
     public List<GameObject> buttonsList;
-    [HideInInspector] public Sprite selected;
-    public Sprite empty;
+    public Sprite selected;
+    public GemSO selectedGemSO;
 
     EditorGem[,] grid;
+
+    public List<GameObject> editorNodeList;
+
     private void Awake()
     {
         i = this;
-        selected = gems[0].sprite;
+        container = GameObject.Find("Canvas/Board").transform;
+        background = GameObject.Find("Canvas/Background").transform;
+        selected = gemsForUse[0].sprite;
+        selectedGemSO = gemsForUse[0];
     }
     private void Start()
     {
+        for (int i = 0; i < gemsForUse.Count; i++)
+        {
+            int index = i;
+            buttonsList[i].GetComponent<Image>().sprite = gemsForUse[i].sprite;
+            buttonsList[i].GetComponent<Button>().onClick.AddListener(delegate { PickGem(index); });
+        }
+    }
+    public void InitializeLevel()
+    {
+        foreach (GameObject item in editorNodeList)
+        {
+            Destroy(item);  
+        }
+        editorNodeList = new();
+        grid = null;
+
         if (levelSO == null)
             Debug.LogError("Select levelSO to edit!");
-        if (buttonsList.Count != gems.Count)
+        if (buttonsList.Count != gemsForUse.Count)
             Debug.LogError("buttonsList and gems count must be equale");
 
         width = levelSO.w;
         height = levelSO.h;
 
-        for (int i = 0; i < gems.Count; i++)
-        {
-            int index = i;
-            buttonsList[i].GetComponent<Image>().sprite = gems[i].sprite;
-            buttonsList[i].GetComponent<Button>().onClick.AddListener(delegate { PickGem(index); });
-        }
+
         container.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(width * 64, height * 64);
         background.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(width * 64, height * 64);
 
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < height; y++)
-            {
-                GameObject node = Instantiate(obj, background);
-                node.GetComponent<RectTransform>().anchoredPosition = new Vector2(-32 - (64 * x), -32 - (64 * y));
-            }
-        }
-
         grid = new EditorGem[width, height];
+
+        List<GemData> dataList = new(levelSO.boardDataList);
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
             {
-                GameObject node = Instantiate(obj, container);
+                GameObject node = Instantiate(Utils.Ñollection.EditorGem, container);
+                editorNodeList.Add(node);
                 node.GetComponent<RectTransform>().anchoredPosition = new Vector2(-32 - (64 * x), -32 - (64 * y));
                 EditorGem e = node.GetComponent<EditorGem>();
-                if (x + y <= levelSO.boardDataList.Count)
-                    e.Initialize(levelSO.boardDataList[x + y].gemSO, levelSO.boardDataList[x + y].hasGlass);
-                else
-                    e.Initialize(null, false);
+
+                e.Initialize(dataList[0].gemSO, dataList[0].hasGlass);
+                dataList.RemoveAt(0);
+
                 grid[x, y] = e;
             }
         }
     }
     public void PickGem(int i)
     {
-        selected = gems[i].sprite;
+        selected = gemsForUse[i].sprite;
+        selectedGemSO = gemsForUse[i];
     }
     public void SaveLevelData()
     {
@@ -78,7 +92,7 @@ public class LevelEditor : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 EditorGem node = grid[x, y];
-                if (node.img.sprite == empty)
+                if (node.img.sprite == Utils.Ñollection.Empty)
                 {
                     Debug.LogError("Set all gems!");
                     return;
@@ -100,7 +114,7 @@ public class LevelEditor : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 EditorGem node = grid[x, y];
-                node.Initialize(gems[UnityEngine.Random.Range(0, gems.Count)], false);
+                node.Initialize(levelSO.gemList[Random.Range(0, levelSO.gemList.Count)], false);
             }
         }
     }
